@@ -1,0 +1,1101 @@
+{
+  "datasets": [
+    {
+      "name": "employee_scorecard",
+      "displayName": "Gold Employee Fraud Scorecard",
+      "queryLines": [
+        "SELECT\n",
+        "  *\n",
+        "FROM\n",
+        "  workspace.gold_schema.gold_employee_fraud_scorecard"
+      ]
+    },
+    {
+      "name": "hourly_trends",
+      "displayName": "Gold Hourly Anomaly Trends",
+      "queryLines": [
+        "SELECT\n",
+        "  *\n",
+        "FROM\n",
+        "  workspace.gold_schema.gold_hourly_anomaly_trends"
+      ]
+    },
+    {
+      "name": "location_summary",
+      "displayName": "Gold Location Loss Prevention Summary",
+      "queryLines": [
+        "SELECT\n",
+        "  *\n",
+        "FROM\n",
+        "  workspace.gold_schema.gold_location_loss_prevention_summary"
+      ]
+    },
+    {
+      "name": "suspect_details",
+      "displayName": "Gold Suspect Check Details",
+      "queryLines": [
+        "SELECT\n",
+        "  *\n",
+        "FROM\n",
+        "  workspace.gold_schema.gold_suspect_check_details"
+      ]
+    },
+    {
+      "name": "employee_flags_unpivoted",
+      "displayName": "Employee Fraud Flags (Unpivoted)",
+      "queryLines": [
+        "WITH top_emp AS (\n",
+        "  SELECT\n",
+        "    employee_name,\n",
+        "    LocationId,\n",
+        "    total_suspect_checks,\n",
+        "    high_val_discount_flags,\n",
+        "    low_val_discount_flags,\n",
+        "    irregular_hours_flags,\n",
+        "    negative_price_flags,\n",
+        "    suspicious_togo_flags\n",
+        "  FROM\n",
+        "    workspace.gold_schema.gold_employee_fraud_scorecard\n",
+        "  ORDER BY\n",
+        "    total_suspect_checks DESC\n",
+        "  LIMIT 15\n",
+        ")\n",
+        "SELECT\n",
+        "  employee_name,\n",
+        "  'High Val Discount' AS flag_type,\n",
+        "  high_val_discount_flags AS flag_count\n",
+        "FROM\n",
+        "  top_emp\n",
+        "UNION ALL\n",
+        "SELECT\n",
+        "  employee_name,\n",
+        "  'Low Val Discount',\n",
+        "  low_val_discount_flags\n",
+        "FROM\n",
+        "  top_emp\n",
+        "UNION ALL\n",
+        "SELECT\n",
+        "  employee_name,\n",
+        "  'Irregular Hours',\n",
+        "  irregular_hours_flags\n",
+        "FROM\n",
+        "  top_emp\n",
+        "UNION ALL\n",
+        "SELECT\n",
+        "  employee_name,\n",
+        "  'Negative Price',\n",
+        "  negative_price_flags\n",
+        "FROM\n",
+        "  top_emp\n",
+        "UNION ALL\n",
+        "SELECT\n",
+        "  employee_name,\n",
+        "  'Suspicious Togo',\n",
+        "  suspicious_togo_flags\n",
+        "FROM\n",
+        "  top_emp"
+      ]
+    },
+    {
+      "name": "top20_employees",
+      "displayName": "Top 20 Employees by Suspect Checks",
+      "queryLines": [
+        "SELECT\n",
+        "  *\n",
+        "FROM\n",
+        "  workspace.gold_schema.gold_employee_fraud_scorecard\n",
+        "ORDER BY\n",
+        "  total_suspect_checks DESC\n",
+        "LIMIT 20"
+      ]
+    },
+    {
+      "name": "hourly_totals",
+      "displayName": "Hourly Totals Across All Locations",
+      "queryLines": [
+        "SELECT\n",
+        "  hour_of_day,\n",
+        "  SUM(suspect_check_count) AS suspect_check_count,\n",
+        "  SUM(off_hours_count) AS off_hours_count,\n",
+        "  SUM(suspicious_togo_count) AS suspicious_togo_count,\n",
+        "  AVG(avg_check_duration_minutes) AS avg_check_duration_minutes\n",
+        "FROM\n",
+        "  workspace.gold_schema.gold_hourly_anomaly_trends\n",
+        "GROUP BY\n",
+        "  hour_of_day\n",
+        "ORDER BY\n",
+        "  hour_of_day"
+      ]
+    },
+    {
+      "name": "top15_employees",
+      "displayName": "Top 15 Employees by Suspect Checks",
+      "queryLines": [
+        "SELECT\n",
+        "  *\n",
+        "FROM\n",
+        "  workspace.gold_schema.gold_employee_fraud_scorecard\n",
+        "ORDER BY\n",
+        "  total_suspect_checks DESC\n",
+        "LIMIT 15"
+      ]
+    },
+    {
+      "name": "off_hours_filtered",
+      "displayName": "Off-Hours Anomaly Trends (2-7 AM)",
+      "queryLines": [
+        "SELECT\n",
+        "  *\n",
+        "FROM\n",
+        "  workspace.gold_schema.gold_hourly_anomaly_trends\n",
+        "WHERE\n",
+        "  hour_of_day BETWEEN 2 AND 7\n",
+        "ORDER BY\n",
+        "  off_hours_count DESC"
+      ]
+    },
+    {
+      "name": "top10_location_hourly",
+      "displayName": "Top 10 Locations Hourly Trends",
+      "queryLines": [
+        "WITH top_loc AS (\n",
+        "  SELECT\n",
+        "    LocationId,\n",
+        "    SUM(suspect_check_count) AS total_checks\n",
+        "  FROM\n",
+        "    workspace.gold_schema.gold_hourly_anomaly_trends\n",
+        "  GROUP BY\n",
+        "    LocationId\n",
+        "  ORDER BY\n",
+        "    total_checks DESC\n",
+        "  LIMIT 10\n",
+        ")\n",
+        "SELECT\n",
+        "  h.LocationId,\n",
+        "  h.hour_of_day,\n",
+        "  h.suspect_check_count,\n",
+        "  h.off_hours_count,\n",
+        "  h.suspicious_togo_count,\n",
+        "  h.avg_check_duration_minutes\n",
+        "FROM\n",
+        "  workspace.gold_schema.gold_hourly_anomaly_trends h\n",
+        "    INNER JOIN top_loc t\n",
+        "      ON h.LocationId = t.LocationId\n",
+        "ORDER BY\n",
+        "  h.LocationId ASC,\n",
+        "  h.hour_of_day ASC"
+      ]
+    },
+    {
+      "name": "top10_locations",
+      "displayName": "Top 10 Locations by $ at Risk",
+      "queryLines": [
+        "SELECT\n",
+        "  *\n",
+        "FROM\n",
+        "  workspace.gold_schema.gold_location_loss_prevention_summary\n",
+        "ORDER BY\n",
+        "  total_dollars_at_risk DESC\n",
+        "LIMIT 10"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "104fb345",
+      "displayName": "Loss Prevention Overview",
+      "layout": [
+        {
+          "widget": {
+            "name": "kpi_total_checks",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "suspect_details",
+                  "fields": [
+                    {
+                      "name": "count(Id)",
+                      "expression": "COUNT(`Id`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Total Suspect Checks"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "count(Id)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_dollars_at_risk",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "location_summary",
+                  "fields": [
+                    {
+                      "name": "sum(total_dollars_at_risk)",
+                      "expression": "SUM(`total_dollars_at_risk`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Total Dollars at Risk",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_dollars_at_risk)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_employees_flagged",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "employee_scorecard",
+                  "fields": [
+                    {
+                      "name": "countdistinct(employee_id)",
+                      "expression": "COUNT(DISTINCT `employee_id`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Total Employees Flagged"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(employee_id)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_top10_locations",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top10_locations",
+                  "fields": [
+                    {
+                      "name": "LocationId",
+                      "expression": "`LocationId`"
+                    },
+                    {
+                      "name": "sum(total_dollars_at_risk)",
+                      "expression": "SUM(`total_dollars_at_risk`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Top 10 Locations by $ at Risk"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "LocationId",
+                  "displayName": "LocationId",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_dollars_at_risk)",
+                  "displayName": "total_dollars_at_risk",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "LocationId",
+                  "displayName": "LocationId",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 7,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "table_top10_locations",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top10_locations",
+                  "fields": [
+                    {
+                      "name": "LocationId",
+                      "expression": "`LocationId`"
+                    },
+                    {
+                      "name": "revenue_center_name",
+                      "expression": "`revenue_center_name`"
+                    },
+                    {
+                      "name": "total_flagged_checks",
+                      "expression": "`total_flagged_checks`"
+                    },
+                    {
+                      "name": "total_discount_loss",
+                      "expression": "`total_discount_loss`"
+                    },
+                    {
+                      "name": "total_void_loss",
+                      "expression": "`total_void_loss`"
+                    },
+                    {
+                      "name": "total_dollars_at_risk",
+                      "expression": "`total_dollars_at_risk`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Top 10 Locations — Loss Prevention Detail"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "LocationId"
+                  },
+                  {
+                    "fieldName": "revenue_center_name"
+                  },
+                  {
+                    "fieldName": "total_flagged_checks"
+                  },
+                  {
+                    "fieldName": "total_discount_loss"
+                  },
+                  {
+                    "fieldName": "total_void_loss"
+                  },
+                  {
+                    "fieldName": "total_dollars_at_risk"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 7,
+            "y": 4,
+            "width": 5,
+            "height": 7
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "employee_fraud_scorecard",
+      "displayName": "Employee Fraud Scorecard",
+      "layout": [
+        {
+          "widget": {
+            "name": "bar_top15_employees",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top15_employees",
+                  "fields": [
+                    {
+                      "name": "employee_name",
+                      "expression": "`employee_name`"
+                    },
+                    {
+                      "name": "sum(total_suspect_checks)",
+                      "expression": "SUM(`total_suspect_checks`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Top 15 Employees by Suspect Checks"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "employee_name",
+                  "displayName": "employee_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_suspect_checks)",
+                  "displayName": "total_suspect_checks",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "employee_name",
+                  "displayName": "employee_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "stacked_bar_flags",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "employee_flags_unpivoted",
+                  "fields": [
+                    {
+                      "name": "flag_type",
+                      "expression": "`flag_type`"
+                    },
+                    {
+                      "name": "employee_name",
+                      "expression": "`employee_name`"
+                    },
+                    {
+                      "name": "sum(flag_count)",
+                      "expression": "SUM(`flag_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Fraud Flag Breakdown — Top 15 Employees"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "employee_name",
+                  "displayName": "employee_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(flag_count)",
+                  "displayName": "flag_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "flag_type",
+                  "displayName": "flag_type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "table_top20_employees",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top20_employees",
+                  "fields": [
+                    {
+                      "name": "employee_id",
+                      "expression": "`employee_id`"
+                    },
+                    {
+                      "name": "employee_name",
+                      "expression": "`employee_name`"
+                    },
+                    {
+                      "name": "LocationId",
+                      "expression": "`LocationId`"
+                    },
+                    {
+                      "name": "total_suspect_checks",
+                      "expression": "`total_suspect_checks`"
+                    },
+                    {
+                      "name": "high_val_discount_flags",
+                      "expression": "`high_val_discount_flags`"
+                    },
+                    {
+                      "name": "low_val_discount_flags",
+                      "expression": "`low_val_discount_flags`"
+                    },
+                    {
+                      "name": "irregular_hours_flags",
+                      "expression": "`irregular_hours_flags`"
+                    },
+                    {
+                      "name": "negative_price_flags",
+                      "expression": "`negative_price_flags`"
+                    },
+                    {
+                      "name": "suspicious_togo_flags",
+                      "expression": "`suspicious_togo_flags`"
+                    },
+                    {
+                      "name": "total_discount_dollars_at_risk",
+                      "expression": "`total_discount_dollars_at_risk`"
+                    },
+                    {
+                      "name": "total_void_dollars_at_risk",
+                      "expression": "`total_void_dollars_at_risk`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Top 20 Employees — Full Scorecard"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "employee_id"
+                  },
+                  {
+                    "fieldName": "employee_name"
+                  },
+                  {
+                    "fieldName": "LocationId"
+                  },
+                  {
+                    "fieldName": "total_suspect_checks"
+                  },
+                  {
+                    "fieldName": "high_val_discount_flags"
+                  },
+                  {
+                    "fieldName": "low_val_discount_flags"
+                  },
+                  {
+                    "fieldName": "irregular_hours_flags"
+                  },
+                  {
+                    "fieldName": "negative_price_flags"
+                  },
+                  {
+                    "fieldName": "suspicious_togo_flags"
+                  },
+                  {
+                    "fieldName": "total_discount_dollars_at_risk"
+                  },
+                  {
+                    "fieldName": "total_void_dollars_at_risk"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 12,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "hourly_anomaly_trends",
+      "displayName": "Hourly Anomaly Trends",
+      "layout": [
+        {
+          "widget": {
+            "name": "line_suspect_by_hour",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "hourly_totals",
+                  "fields": [
+                    {
+                      "name": "hour_of_day",
+                      "expression": "`hour_of_day`"
+                    },
+                    {
+                      "name": "sum(suspect_check_count)",
+                      "expression": "SUM(`suspect_check_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Suspect Checks by Hour of Day"
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "hour_of_day",
+                  "displayName": "hour_of_day",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(suspect_check_count)",
+                  "displayName": "suspect_check_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_off_hours",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "hourly_totals",
+                  "fields": [
+                    {
+                      "name": "hour_of_day",
+                      "expression": "`hour_of_day`"
+                    },
+                    {
+                      "name": "sum(off_hours_count)",
+                      "expression": "SUM(`off_hours_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Off-Hours Count by Hour of Day"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "hour_of_day",
+                  "displayName": "hour_of_day",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(off_hours_count)",
+                  "displayName": "off_hours_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_top10_location_hourly",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top10_location_hourly",
+                  "fields": [
+                    {
+                      "name": "LocationId",
+                      "expression": "`LocationId`"
+                    },
+                    {
+                      "name": "hour_of_day",
+                      "expression": "`hour_of_day`"
+                    },
+                    {
+                      "name": "sum(suspect_check_count)",
+                      "expression": "SUM(`suspect_check_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Suspect Checks by Location & Hour (Top 10 Locations)"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "hour_of_day",
+                  "displayName": "hour_of_day",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(suspect_check_count)",
+                  "displayName": "suspect_check_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "LocationId",
+                  "displayName": "LocationId",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "table_off_hours",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "off_hours_filtered",
+                  "fields": [
+                    {
+                      "name": "LocationId",
+                      "expression": "`LocationId`"
+                    },
+                    {
+                      "name": "hour_of_day",
+                      "expression": "`hour_of_day`"
+                    },
+                    {
+                      "name": "suspect_check_count",
+                      "expression": "`suspect_check_count`"
+                    },
+                    {
+                      "name": "off_hours_count",
+                      "expression": "`off_hours_count`"
+                    },
+                    {
+                      "name": "suspicious_togo_count",
+                      "expression": "`suspicious_togo_count`"
+                    },
+                    {
+                      "name": "avg_check_duration_minutes",
+                      "expression": "`avg_check_duration_minutes`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Off-Hours Detail (2–7 AM) — Ordered by Off-Hours Count"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "LocationId"
+                  },
+                  {
+                    "fieldName": "hour_of_day"
+                  },
+                  {
+                    "fieldName": "suspect_check_count"
+                  },
+                  {
+                    "fieldName": "off_hours_count"
+                  },
+                  {
+                    "fieldName": "suspicious_togo_count"
+                  },
+                  {
+                    "fieldName": "avg_check_duration_minutes"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {
+        "light": "#1B1C1B",
+        "dark": "#1B1C1B"
+      },
+      "widgetBackgroundColor": {
+        "light": "#131413",
+        "dark": "#131413"
+      },
+      "widgetBorderColor": {
+        "light": "#131413",
+        "dark": "#131413"
+      },
+      "fontColor": {
+        "light": "#65C406",
+        "dark": "#65C406"
+      },
+      "selectionColor": {
+        "light": "#72E500",
+        "dark": "#72E500"
+      },
+      "visualizationColors": [
+        "#15AFDD",
+        "#2375A8",
+        "#52A870",
+        "#C85070",
+        "#C89930"
+      ],
+      "widgetHeaderAlignment": "LEFT",
+      "fontFamily": "Roboto Mono",
+      "widgetPadding": 16,
+      "widgetMargin": 4,
+      "widgetCornerRadius": 0,
+      "widgetShadow": 0,
+      "continuousGradient": {
+        "lightMode": {
+          "fromCategoricalIndex": 0
+        },
+        "darkMode": {
+          "fromCategoricalIndex": 0
+        }
+      },
+      "fontSettings": {
+        "base": {
+          "fontFamily": "Inter",
+          "fontColor": {
+            "light": "#08141A",
+            "dark": "#EBEBEB"
+          },
+          "fontSize": 13,
+          "fontWeight": 400
+        },
+        "widgetTitle": {
+          "fontSize": 15,
+          "fontWeight": 500
+        },
+        "widgetDescription": {
+          "fontSize": 13,
+          "fontWeight": 400
+        },
+        "fieldTitle": {
+          "textCase": "TEXT_CASE_UPPERCASE",
+          "fontColor": {
+            "light": "#5BB005",
+            "dark": "#5BB005"
+          },
+          "fontSize": 12,
+          "fontWeight": 400
+        },
+        "fieldValue": {
+          "fontColor": {
+            "light": "#5BB005",
+            "dark": "#5BB005"
+          },
+          "fontSize": 12,
+          "fontWeight": 400
+        }
+      },
+      "gridLineColor": {
+        "light": "#213310",
+        "dark": "#213310"
+      },
+      "axisLineColor": {
+        "light": "#2E4814",
+        "dark": "#2E4814"
+      }
+    },
+    "applyModeEnabled": false
+  }
+}
