@@ -1,0 +1,76 @@
+resources:
+  jobs:
+    Fraud_Detection_Pipeline_Daily:
+      name: Fraud_Detection_Pipeline_Daily
+      timeout_seconds: 7200
+      health:
+        rules:
+          - metric: RUN_DURATION_SECONDS
+            op: GREATER_THAN
+            value: 1800
+      schedule:
+        quartz_cron_expression: 0 0 5 * * ?
+        timezone_id: America/Mexico_City
+        pause_status: UNPAUSED
+      tasks:
+        - task_key: Bronze_Layer
+          notebook_task:
+            notebook_path: Applebees_Pipeline_bronzelayer.ipynb
+            source: GIT
+          email_notifications:
+            on_failure:
+              - a01783104@tec.mx
+          notification_settings:
+            alert_on_last_attempt: true
+          environment_key: Default
+        - task_key: Silver_Layer
+          depends_on:
+            - task_key: Bronze_Layer
+          notebook_task:
+            notebook_path: Applebees_Pipeline_silverlayer.ipynb
+            source: GIT
+          email_notifications:
+            on_failure:
+              - a01783104@tec.mx
+          notification_settings:
+            alert_on_last_attempt: true
+          environment_key: Default
+        - task_key: Gold_Layer
+          depends_on:
+            - task_key: Silver_Layer
+          notebook_task:
+            notebook_path: Applebees_Pipeline_goldlayer.ipynb
+            source: GIT
+          email_notifications:
+            on_failure:
+              - a01783104@tec.mx
+          notification_settings:
+            alert_on_last_attempt: true
+          environment_key: Default
+        - task_key: Gold_Layer_Dashboard
+          depends_on:
+            - task_key: Gold_Layer
+          dashboard_task:
+            subscription:
+              subscribers:
+                - user_name: a01783104@tec.mx
+              attachment:
+                page_attachment: {}
+            warehouse_id: d6c7c9d5921496d6
+            dashboard_id: 01f1d2fa6ddf1fa0af6bc6a0986c0a6c
+      git_source:
+        git_url: https://github.com/AndresCel100/databricks-data-pipeline.git
+        git_provider: gitHub
+        git_branch: main
+      tags:
+        business_unit: loss_prevention
+        environment: production
+        layer: medallion_pipeline
+        project: fraud_detection
+      queue:
+        enabled: true
+      environments:
+        - environment_key: Default
+          spec:
+            environment_version: "6"
+      performance_target: PERFORMANCE_OPTIMIZED
