@@ -1,4 +1,4 @@
-# Medallion Fraud Detection & Loss Prevention Pipeline
+# Medallion Fraud Detection & Loss Prevention Pipeline.
 
 An end-to-end, production-grade Medallion Lakehouse architecture built on Databricks to detect, quantify, and visualize point-of-sale (POS) transactional fraud and anomalies across retail and restaurant store locations.
 
