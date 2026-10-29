@@ -2,7 +2,7 @@
 
 An end-to-end, production-grade Medallion Lakehouse architecture built on Databricks to detect, quantify, and visualize point-of-sale (POS) transactional fraud and anomalies across retail and restaurant store locations.
 
-## 📌 Architecture Overview
+##  Architecture Overview
 
 The pipeline implements a three-tier Medallion architecture orchestrated via Databricks Workflows, transforming raw, nested POS transaction logs into actionable loss-prevention intelligence.
 
@@ -27,7 +27,7 @@ The pipeline implements a three-tier Medallion architecture orchestrated via Dat
                                                               └──────────────┘
 ```
 
-## 📂 Repository Structure
+##  Repository Structure
 
 ```text
 databricks-data-pipeline/
@@ -47,7 +47,7 @@ databricks-data-pipeline/
             └── Applebees Fraud Analytics Dashboard.lvdash.json
 ```
 
-## 🏗️ Data Layers & Logic
+##  Data Layers & Logic
 
 ### 1. Bronze Layer (`src/transformations/bronze/Applebees_Pipeline_bronzelayer.ipynb`)
 
@@ -82,7 +82,7 @@ Consolidates transaction-level suspect indicators from `suspect_fraud_checks` in
 
 ---
 
-## 📊 Loss Prevention AI/BI Dashboard
+## Loss Prevention AI/BI Dashboard
 
 An interactive Databricks AI/BI Dashboard (`src/transformations/gold/Applebees Fraud Analytics Dashboard.lvdash.json`) connects directly to the Gold layer tables to present key metrics to store managers and loss prevention teams:
 
@@ -93,7 +93,7 @@ An interactive Databricks AI/BI Dashboard (`src/transformations/gold/Applebees F
 
 ---
 
-## ⚙️ Orchestration & Automated Operations
+##  Orchestration & Automated Operations
 
 The entire end-to-end pipeline is orchestrated via Databricks Workflows defined in `resources/jobs/daily_orchestration_job.yml`:
 
@@ -104,7 +104,7 @@ The entire end-to-end pipeline is orchestrated via Databricks Workflows defined 
 
 ---
 
-## 🚀 Setup & Local Deployment
+##  Setup & Local Deployment
 
 ### Prerequisites
 * Databricks Workspace with Unity Catalog or Hive Metastore enabled.
