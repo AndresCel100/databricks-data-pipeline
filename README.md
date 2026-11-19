@@ -124,4 +124,4 @@ The end-to-end pipeline is managed declaratively via **`beestats_medallion_pipel
 3. **Publish AI/BI Dashboard:**
    - Open `src/dashboards/Applebees Fraud Analytics Dashboard`, verify all datasets query `workspace.gold`, attach a Serverless SQL Warehouse, and click **Publish**.
 4. **Configure Daily Schedule & Alerts:**
-   - Open the orchestrating **Lakeflow Job** under **Jobs & Pipelines**, verify the **5:00 AM (`America/Mexico_City`)** daily schedule trigger, and add your alerting email address under **Notifications**.
+   - Open the orchestrating **Lakeflow Job** under **Jobs & Pipelines**, verify the **5:00 AM (`America/Chicago`)** daily schedule trigger, and add your alerting email address under **Notifications**.
