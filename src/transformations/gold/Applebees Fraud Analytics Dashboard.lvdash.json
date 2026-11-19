@@ -7,7 +7,7 @@
         "SELECT\n",
         "  *\n",
         "FROM\n",
-        "  workspace.gold_schema.gold_employee_fraud_scorecard"
+        "  workspace.gold.gold_employee_fraud_scorecard"
       ]
     },
     {
@@ -17,7 +17,7 @@
         "SELECT\n",
         "  *\n",
         "FROM\n",
-        "  workspace.gold_schema.gold_hourly_anomaly_trends"
+        "  workspace.gold.gold_hourly_anomaly_trends"
       ]
     },
     {
@@ -27,7 +27,7 @@
         "SELECT\n",
         "  *\n",
         "FROM\n",
-        "  workspace.gold_schema.gold_location_loss_prevention_summary"
+        "  workspace.gold.gold_location_loss_prevention_summary"
       ]
     },
     {
@@ -37,7 +37,7 @@
         "SELECT\n",
         "  *\n",
         "FROM\n",
-        "  workspace.gold_schema.gold_suspect_check_details"
+        "  workspace.gold.gold_suspect_check_details"
       ]
     },
     {
@@ -55,7 +55,7 @@
         "    negative_price_flags,\n",
         "    suspicious_togo_flags\n",
         "  FROM\n",
-        "    workspace.gold_schema.gold_employee_fraud_scorecard\n",
+        "    workspace.gold.gold_employee_fraud_scorecard\n",
         "  ORDER BY\n",
         "    total_suspect_checks DESC\n",
         "  LIMIT 15\n",
@@ -103,7 +103,7 @@
         "SELECT\n",
         "  *\n",
         "FROM\n",
-        "  workspace.gold_schema.gold_employee_fraud_scorecard\n",
+        "  workspace.gold.gold_employee_fraud_scorecard\n",
         "ORDER BY\n",
         "  total_suspect_checks DESC\n",
         "LIMIT 20"
@@ -120,7 +120,7 @@
         "  SUM(suspicious_togo_count) AS suspicious_togo_count,\n",
         "  AVG(avg_check_duration_minutes) AS avg_check_duration_minutes\n",
         "FROM\n",
-        "  workspace.gold_schema.gold_hourly_anomaly_trends\n",
+        "  workspace.gold.gold_hourly_anomaly_trends\n",
         "GROUP BY\n",
         "  hour_of_day\n",
         "ORDER BY\n",
@@ -134,7 +134,7 @@
         "SELECT\n",
         "  *\n",
         "FROM\n",
-        "  workspace.gold_schema.gold_employee_fraud_scorecard\n",
+        "  workspace.gold.gold_employee_fraud_scorecard\n",
         "ORDER BY\n",
         "  total_suspect_checks DESC\n",
         "LIMIT 15"
@@ -147,7 +147,7 @@
         "SELECT\n",
         "  *\n",
         "FROM\n",
-        "  workspace.gold_schema.gold_hourly_anomaly_trends\n",
+        "  workspace.gold.gold_hourly_anomaly_trends\n",
         "WHERE\n",
         "  hour_of_day BETWEEN 2 AND 7\n",
         "ORDER BY\n",
@@ -163,7 +163,7 @@
         "    LocationId,\n",
         "    SUM(suspect_check_count) AS total_checks\n",
         "  FROM\n",
-        "    workspace.gold_schema.gold_hourly_anomaly_trends\n",
+        "    workspace.gold.gold_hourly_anomaly_trends\n",
         "  GROUP BY\n",
         "    LocationId\n",
         "  ORDER BY\n",
@@ -178,7 +178,7 @@
         "  h.suspicious_togo_count,\n",
         "  h.avg_check_duration_minutes\n",
         "FROM\n",
-        "  workspace.gold_schema.gold_hourly_anomaly_trends h\n",
+        "  workspace.gold.gold_hourly_anomaly_trends h\n",
         "    INNER JOIN top_loc t\n",
         "      ON h.LocationId = t.LocationId\n",
         "ORDER BY\n",
@@ -193,7 +193,7 @@
         "SELECT\n",
         "  *\n",
         "FROM\n",
-        "  workspace.gold_schema.gold_location_loss_prevention_summary\n",
+        "  workspace.gold.gold_location_loss_prevention_summary\n",
         "ORDER BY\n",
         "  total_dollars_at_risk DESC\n",
         "LIMIT 10"
@@ -270,7 +270,7 @@
               "frame": {
                 "showTitle": true,
                 "title": {
-                  "value": "Total Dollars at Risk",
+                  "value": "Possible Total Dollars at Risk",
                   "fields": []
                 }
               },
