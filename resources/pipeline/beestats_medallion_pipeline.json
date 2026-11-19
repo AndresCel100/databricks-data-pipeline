@@ -1,0 +1,42 @@
+{
+  "id": "8d5cb09f-f282-4099-a591-e783f3fc82fa",
+  "pipeline_type": "WORKSPACE",
+  "name": "beestats_medallion_pipeline",
+  "libraries": [
+    {
+      "file": {
+        "path": "/Workspace/Users/a01783104@tec.mx/databricks-data-pipeline/src/transformations/bronze/bronze_ingestion.py"
+      }
+    },
+    {
+      "file": {
+        "path": "/Workspace/Users/a01783104@tec.mx/databricks-data-pipeline/src/transformations/silver/silver_transformations.py"
+      }
+    },
+    {
+      "file": {
+        "path": "/Workspace/Users/a01783104@tec.mx/databricks-data-pipeline/src/transformations/gold/gold_aggregations.py"
+      }
+    }
+  ],
+  "schema": "bronze",
+  "continuous": false,
+  "development": false,
+  "photon": true,
+  "channel": "CURRENT",
+  "catalog": "workspace",
+  "notifications": [
+    {
+      "email_recipients": [
+        "a01783104@tec.mx"
+      ],
+      "alerts": [
+        "on-update-failure",
+        "on-flow-failure",
+        "on-update-success"
+      ]
+    }
+  ],
+  "serverless": true,
+  "root_path": "/Workspace/Users/a01783104@tec.mx/databricks-data-pipeline/src"
+}
